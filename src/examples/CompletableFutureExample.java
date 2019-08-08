@@ -1,6 +1,10 @@
 package examples;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class CompletableFutureExample {
     public static void main(String []args) throws Exception {
@@ -20,7 +24,6 @@ public class CompletableFutureExample {
         });
 
 
-
         //Обработка ошибок
         CompletableFuture.completedFuture(2L)
                 .thenApply((a) -> {
@@ -28,5 +31,29 @@ public class CompletableFutureExample {
                 }).thenApply((a) -> 3L)
                 //.exceptionally(ex -> 0L)
                 .thenAccept(val -> System.out.println(val));
+
+
+        List<String> array = Arrays.asList("one", "two");
+        Stream<String> stringStream = array.stream().map(value -> {
+            System.out.println("Executed");
+            return value.toUpperCase();
+        });
+
+        System.out.println(array);
+
+
+        Supplier newsSupplier = () -> {
+            try {
+                Thread.sleep(2000);
+            }
+            catch (Exception e){}
+            return "the item";
+        };
+
+        CompletableFuture<String> reader = CompletableFuture.supplyAsync(newsSupplier);
+        CompletableFuture.completedFuture("!!")
+                .thenCombine(reader, (a, b) -> b + a)
+                .thenAccept(result -> System.out.println(result))
+                .get();
     }
 }
